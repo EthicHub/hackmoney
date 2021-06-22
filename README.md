@@ -1,4 +1,15 @@
-# 🏗 scaffold-eth - 🎟 Simple NFT Example
+#  EthicHub: From Yield Farmers to Actual Farmers
+
+Our project wants to create a PoC connecting yield farmers with actual farmers.
+
+Users will add stable coin liquidity (fixed interest, fixed maturity bond) to a lending pool, representing the bond with an NFT
+Pool will be investing in impact projects (financing smallholder farmers @ ethichub.com) and DeFi aggregators, rebalancing as needed
+
+[Entry in HackMoney2021](EthicHub: Yield Farmers to Actual Farmers · ETHGlobal Showcase)
+
+
+
+# 🏗 Based on scaffold-eth - 🎟 Simple NFT Example
 
 > Mint and display NFTs on Ethereum with a full example app...
 
