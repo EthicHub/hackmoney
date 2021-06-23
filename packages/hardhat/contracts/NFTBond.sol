@@ -21,7 +21,7 @@ contract NFTBond is ERC721 {
     }
 
     mapping(uint256 => Bond) public bonds;
-    IERC20 principalToken;
+    IERC20 public principalToken;
 
     constructor(address principalTokenAddress) public ERC721("EthicBond", "EHB") {
       require(principalTokenAddress != address(0), "NFTBond::Invalid token address");
@@ -32,23 +32,29 @@ contract NFTBond is ERC721 {
     function _createBond(uint256 id, uint256 maturity, uint256 principal, uint256 interest) internal {
       require(interest > 0, "NFTBond::Interest cant be 0");
       require(principal > 0, "NFTBond::Principal cant be 0");
-      require(principalToken.transferFrom(msg.sender, address(this), principal));
       bonds[id] = Bond(block.timestamp, maturity, principal, interest);
     }
 
 
-    function buyBond(string calldata tokenURI,address buyer, uint256 maturity, uint256 principal, uint256 interest)
+    function buyBond(string calldata tokenURI, uint256 maturity, uint256 principal, uint256 interest)
         external
         returns (uint256)
     {
+        console.log("principal token", address(principalToken));
+        console.log("sender", msg.sender);
+        console.log("allowande",principalToken.allowance(msg.sender, address(this)));
+        console.log("principal ", principal);
+        require(principalToken.transferFrom(msg.sender, address(this), principal));
+
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
-        _mint(buyer, newItemId);
+        _mint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
         _createBond(newItemId, maturity, principal, interest);
         return newItemId;
     }
+
     function redeemBond(uint256 tokenId) external {
       require(canRedeem(tokenId), "NFTBond: Can't redeem yet");
       super._burn(tokenId);
