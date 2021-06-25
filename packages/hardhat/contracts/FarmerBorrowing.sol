@@ -4,7 +4,7 @@ pragma solidity >=7.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "tinlake/math/Interest.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-
+import "./IReserve.sol";
 
 interface PileLike {
     function total() external view returns(uint);
@@ -30,7 +30,7 @@ contract FarmerBorrowing is Interest {
     mapping (uint256 => Loan) public loans;
     mapping (uint256 => address) public borrowers;
     mapping (uint256 => uint256) public balances;
-    address public lender;
+    IReserve public reserve;
 
     // Events
     event Close(uint indexed loan);
@@ -41,10 +41,12 @@ contract FarmerBorrowing is Interest {
     event Recover(uint indexed loan, address usr, uint currencyAmount);
     event Claim(uint indexed loan, address usr);
 
-    constructor(address currency_,  address pile_) ) {
+    constructor(address currency_,  address pile_, address reserve_) ) {
         wards[msg.sender] = 1;
         currency = IERC20(currency_);
         pile = PileLike(pile_);
+        reserve = IReserve(reserve)_;
+        currency.approve(reserve_, -1);
 
     }
 
@@ -87,12 +89,13 @@ contract FarmerBorrowing is Interest {
     }
 
 
+
     // transfers the requested currencyAmount to the address of the loan owner
     // the method triggers the reserve to ensure the shelf has enough currency
     function withdraw(uint loan, uint currencyAmount, address usr) external owner(loan) {
         require(currencyAmount <= balances[loan], "withdraw-amount-too-high");
-
-        reserve.balance();
+        //Get liqudity from asset manager
+        reserve.requestLiqudity(currencyAmount);
         balances[loan] = safeSub(balances[loan], currencyAmount);
         balance = safeSub(balance, currencyAmount);
         require(currency.transfer(usr, currencyAmount), "currency-transfer-failed");
@@ -117,7 +120,8 @@ contract FarmerBorrowing is Interest {
         }
         require(currency.transferFrom(usr, address(this), currencyAmount), "currency-transfer-failed");
         pile.decDebt(loan, currencyAmount);
-        reserve.balance();
+        // Asset manager should pull liqudiity
+        reserve.returnLiquidity();
     }
 
     // locks an nft in the shelf
