@@ -8,8 +8,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "utils/Interest.sol";
 
-contract NFTBond is ERC721 {
+contract NFTBond is ERC721, Interest {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -17,11 +18,16 @@ contract NFTBond is ERC721 {
       uint256 mintingDate;
       uint256 maturity;
       uint256 principal;
-      uint256 interest; //in seconds
+      uint256 interest; //annual
     }
+
 
     mapping(uint256 => Bond) public bonds;
     IERC20 public principalToken;
+    
+    event BondCreated(uint256 id, uint256 mintingDate, uint256 maturity, uint256 principal, uint256 interest);
+    event BondRedeemed(uint256 id, uint256 redeemDate, uint256 maturity, uint256 withdrawn, uint256 interest);
+
 
     constructor(address principalTokenAddress) public ERC721("EthicBond", "EHB") {
       require(principalTokenAddress != address(0), "NFTBond::Invalid token address");
@@ -33,6 +39,7 @@ contract NFTBond is ERC721 {
       require(interest > 0, "NFTBond::Interest cant be 0");
       require(principal > 0, "NFTBond::Principal cant be 0");
       bonds[id] = Bond(block.timestamp, maturity, principal, interest);
+      emit BondCreated(id, block.timestamp, maturity, principal, interest);
     }
 
 
@@ -59,18 +66,18 @@ contract NFTBond is ERC721 {
       require(canRedeem(tokenId), "NFTBond: Can't redeem yet");
       super._burn(tokenId);
       uint256 withdrawAmount = positionValue(tokenId);
+      Bond bond = bonds[tokenId];
       delete bonds[tokenId];
       require(principalToken.transfer(msg.sender, withdrawAmount));
-
+      emit BondRedeemed(tokenId, block.timestamp, bond.maturity, withdrawAmount, bond.interest);
     }
 
     function positionValue(uint256 tokenId) public view returns(uint256) {
       Bond memory bond = bonds[tokenId];
-      uint256 ONE = 10^18;
       if (block.timestamp >= bond.maturity.add(bond.mintingDate)) {
-        return bond.principal.mul(ONE.add(bond.interest.mul(bond.maturity)));
+        return simpleInterest(bond.principal, bond.interest, bond.maturity);
       }
-      return bond.principal.mul(ONE.add(bond.interest.mul(block.timestamp.sub(bond.mintingDate))));
+      return simpleInterest(bond.principal, bond.interest, block.timestamp.sub(bond.mintingDate));
     }
 
     function canRedeem(uint256 tokenId) public view returns(bool) {
