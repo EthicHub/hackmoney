@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity >=7.0;
+pragma solidity 0.7.6;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "tinlake/math/Interest.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "./tinlake/math/Interest.sol";
 import "./IReserve.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 interface PileLike {
+    function setRate(uint, uint) external;
+    function file(bytes32, uint, uint) external;
     function total() external view returns(uint);
     function debt(uint) external returns (uint);
     function accrue(uint) external;
@@ -31,6 +34,7 @@ contract FarmerBorrowing is Interest {
     mapping (uint256 => address) public borrowers;
     mapping (uint256 => uint256) public balances;
     IReserve public reserve;
+    PileLike pile;
 
     // Events
     event Close(uint indexed loan);
@@ -41,18 +45,17 @@ contract FarmerBorrowing is Interest {
     event Recover(uint indexed loan, address usr, uint currencyAmount);
     event Claim(uint indexed loan, address usr);
 
-    constructor(address currency_,  address pile_, address reserve_) ) {
-        wards[msg.sender] = 1;
+    constructor(address currency_,  address pile_, address reserve_) {
         currency = IERC20(currency_);
         pile = PileLike(pile_);
-        reserve = IReserve(reserve)_;
-        currency.approve(reserve_, -1);
+        reserve = IReserve(reserve_);
+        currency.approve(reserve_, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 
     }
 
     modifier owner(uint loan) {
-      
-      _
+      require(borrowers[loan] == msg.sender);
+      _;
     }
 
     function requestLoan(uint rate, uint creditCeiling, uint maturity) external returns(uint256) {
@@ -77,14 +80,13 @@ contract FarmerBorrowing is Interest {
     function borrow(uint loan, uint currencyAmount) external owner(loan) {
         //TODO: debt collateralized
         //require(msg.sender has collateral)
-        require(block.timestamp < (safeAdd(loans[loan].maturity, loans[loan].borrowDate));
+        require(block.timestamp < safeAdd(loans[loan].maturity, loans[loan].borrowDate), "borrow-after-maturity");
         pile.accrue(loan);
         pile.incDebt(loan, currencyAmount);
         balances[loan] = safeAdd(balances[loan], currencyAmount);
         require(balances[loan] <= loans[loan].creditCeiling);
-        balance = safeAdd(balance, currencyAmount);
+        // balance = safeAdd(balance, currencyAmount);
         emit Borrow(loan, currencyAmount);
-        return newLoanId;
 
     }
 
@@ -97,7 +99,7 @@ contract FarmerBorrowing is Interest {
         //Get liqudity from asset manager
         reserve.requestLiqudity(currencyAmount);
         balances[loan] = safeSub(balances[loan], currencyAmount);
-        balance = safeSub(balance, currencyAmount);
+        // balance = safeSub(balance, currencyAmount);
         require(currency.transfer(usr, currencyAmount), "currency-transfer-failed");
         emit Withdraw(loan, currencyAmount, usr);
     }
@@ -121,12 +123,12 @@ contract FarmerBorrowing is Interest {
         require(currency.transferFrom(usr, address(this), currencyAmount), "currency-transfer-failed");
         pile.decDebt(loan, currencyAmount);
         // Asset manager should pull liqudiity
-        reserve.returnLiquidity();
+        reserve.returnLiquidity(currencyAmount);
     }
 
     // locks an nft in the shelf
     // requires an issued loan
-
+    /*
     function resetLoanBalance(uint loan) internal {
         uint loanBalance = balances[loan];
         if (loanBalance  > 0) {
@@ -134,5 +136,6 @@ contract FarmerBorrowing is Interest {
             balance = safeSub(balance, loanBalance);
         }
     }
+    */
 
 }

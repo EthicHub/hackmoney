@@ -1,4 +1,4 @@
-pragma solidity >=0.6.0 <0.7.0;
+pragma solidity 0.7.6;
 //SPDX-License-Identifier: MIT
 
 import "hardhat/console.sol";
@@ -8,9 +8,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "utils/Interest.sol";
+import "./utils/SimpleInterest.sol";
 
-contract NFTBond is ERC721, Interest {
+contract NFTBond is ERC721, SimpleInterest {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -66,7 +66,7 @@ contract NFTBond is ERC721, Interest {
       require(canRedeem(tokenId), "NFTBond: Can't redeem yet");
       super._burn(tokenId);
       uint256 withdrawAmount = positionValue(tokenId);
-      Bond bond = bonds[tokenId];
+      Bond memory bond = bonds[tokenId];
       delete bonds[tokenId];
       require(principalToken.transfer(msg.sender, withdrawAmount));
       emit BondRedeemed(tokenId, block.timestamp, bond.maturity, withdrawAmount, bond.interest);
