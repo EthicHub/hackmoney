@@ -4,7 +4,6 @@ pragma solidity 0.7.6;
 import "./tinlake/math/Interest.sol";
 import "./IReserve.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 
 interface PileLike {
@@ -20,7 +19,6 @@ interface PileLike {
 contract FarmerBorrowing is Interest {
 
     IERC20 public currency;
-    using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private loanIds;
 

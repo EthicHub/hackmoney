@@ -14,10 +14,8 @@
 
 
 import "./RewardsAssetManager.sol";
-import "@balancer-labs/v2-distributors/contracts/interfaces/IMultiRewards.sol";
+import "./balancer-labs/v2-distributors/contracts/interfaces/IMultiRewards.sol";
 import "./IReserve.sol";
-import "./FarmerBorrowing.sol";
-import "./Pile.sol";
 
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
@@ -25,33 +23,23 @@ pragma experimental ABIEncoderV2;
 contract EthicHubAssetManager is RewardsAssetManager, IReserve {
     uint16 public constant REFERRAL_CODE = 0;
 
-    IAaveIncentivesController public immutable aaveIncentives;
-    ILendingPool public immutable lendingPool;
     //IERC20 public immutable aToken;
     //IERC20 public immutable stkAave;
 
     // @notice rewards distributor for pool which owns this asset manager
     IMultiRewards public distributor;
-    FarmerBorrowing public borrowingManager; // Handles borrowing for farmers
-    Pile public pie; // Handles debt calculation
+    address public borrowingManager; // Handles borrowing for farmers
+    //Pile public pie; // Handles debt calculation
 
     constructor(
         IVault _vault,
         IERC20 _token,
-        ILendingPool _lendingPool,
-        IAaveIncentivesController _aaveIncentives
+        //Pile _pile,
+        address _borrowingManager
     ) RewardsAssetManager(_vault, bytes32(0), _token) {
-        // Query aToken addresses from lending pool
-        lendingPool = _lendingPool;
-        aToken = IERC20(_lendingPool.getReserveData(address(_token)).aTokenAddress);
 
-        // Query reward token from incentives contract
-        // aaveIncentives = _aaveIncentives;
-        // stkAave = IERC20(_aaveIncentives.REWARD_TOKEN());
-            constructor(address currency_,  address pile_, address reserve_) {
-        pile = new Pile()
-        borrowingManager = new FarmerBorrowing(address(_token), address(pile), address(this));
-        _token.approve(address(_lendingPool), type(uint256).max);
+        //pile = _pile;
+        _token.approve(_borrowingManager, type(uint256).max);
     }
 
     /**
@@ -96,7 +84,7 @@ contract EthicHubAssetManager is RewardsAssetManager, IReserve {
     function _getAUM() internal view override returns (uint256) {
         // TODO 
         // return balance in idle + total outstanding debt in FarmerBorrowing
-        return 0 //aToken.balanceOf(address(this));
+        return 0; //aToken.balanceOf(address(this));
     }
 
     /**
@@ -104,17 +92,17 @@ contract EthicHubAssetManager is RewardsAssetManager, IReserve {
      */
     function requestLiqudity(uint amount) external override {
       if (token.balanceOf(address(this)) < amount) {
-        _divest(amount, this);
+        _divest(amount, 0);
       }
-      token.transfer(borrowingContract, amount);
+      token.transfer(borrowingManager, amount);
     }
 
     /*
       Farmers repaying loan
     */
     function returnLiquidity(uint amount) external override {
-      token.transferFrom(borrowingContract, address(this), amount);
-      _invest(amount, null);
+      token.transferFrom(borrowingManager, address(this), amount);
+      _invest(amount, 0);
     }
 
     /*
