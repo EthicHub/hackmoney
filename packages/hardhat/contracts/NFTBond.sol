@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./utils/SimpleInterest.sol";
 
-contract NFTBond is ERC721, SimpleInterest {
+abstract contract NFTBond is ERC721, SimpleInterest {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -29,9 +29,9 @@ contract NFTBond is ERC721, SimpleInterest {
     event BondRedeemed(uint256 id, uint256 redeemDate, uint256 maturity, uint256 withdrawn, uint256 interest);
 
 
-    constructor(address principalTokenAddress) public ERC721("EthicBond", "EHB") {
-      require(principalTokenAddress != address(0), "NFTBond::Invalid token address");
-      principalToken = IERC20(principalTokenAddress);
+    constructor(address _principalTokenAddress, string memory _tokenName, string memory _tokenSymbol) ERC721(_tokenName, _tokenSymbol) {
+      require(_principalTokenAddress != address(0), "NFTBond::Invalid token address");
+      principalToken = IERC20(_principalTokenAddress);
       _setBaseURI("https://ipfs.io/ipfs/");
     }
 
@@ -52,7 +52,7 @@ contract NFTBond is ERC721, SimpleInterest {
         console.log("allowande",principalToken.allowance(msg.sender, address(this)));
         console.log("principal ", principal);
         require(principalToken.transferFrom(msg.sender, address(this), principal));
-
+        _depositInPool(principal);
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
@@ -68,6 +68,8 @@ contract NFTBond is ERC721, SimpleInterest {
       uint256 withdrawAmount = positionValue(tokenId);
       Bond memory bond = bonds[tokenId];
       delete bonds[tokenId];
+      _withdrawFromPool(withdrawAmount);
+
       require(principalToken.transfer(msg.sender, withdrawAmount));
       emit BondRedeemed(tokenId, block.timestamp, bond.maturity, withdrawAmount, bond.interest);
     }
@@ -85,5 +87,7 @@ contract NFTBond is ERC721, SimpleInterest {
       return block.timestamp >= bond.maturity.add(bond.mintingDate);
     }
 
+    function _depositInPool(uint256 amount) internal virtual;
+    function _withdrawFromPool(uint256 amount) internal virtual;
     
 }

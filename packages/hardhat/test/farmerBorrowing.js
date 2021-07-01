@@ -6,7 +6,7 @@ const { BigNumber } = require('@ethersproject/bignumber')
 
 use(solidity);
 
-describe.only("FarmerBorroing", function () {
+describe("FarmerBorroing", function () {
   let borrowing, reserve, owner, reserveMock, pile
 
   describe("FarmerBorrowing", function () {
