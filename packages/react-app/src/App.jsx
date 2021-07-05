@@ -375,6 +375,9 @@ function App(props) {
               loadWeb3Modal={loadWeb3Modal}
               logoutOfWeb3Modal={logoutOfWeb3Modal}
               blockExplorer={blockExplorer}
+              tx={tx}
+              readContracts={readContracts}
+              writeContract={writeContracts}
             />
           </Route>
           <Route exact path="/farms">
