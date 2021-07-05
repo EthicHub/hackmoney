@@ -365,7 +365,17 @@ function App(props) {
           </Route>
 
           <Route exact path="/bonds">
-            <Bonds />
+            <Bonds
+              address={address}
+              localProvider={localProvider}
+              userSigner={userSigner}
+              mainnetProvider={mainnetProvider}
+              price={price}
+              web3Modal={web3Modal}
+              loadWeb3Modal={loadWeb3Modal}
+              logoutOfWeb3Modal={logoutOfWeb3Modal}
+              blockExplorer={blockExplorer}
+            />
           </Route>
           <Route exact path="/farms">
             <Farms />

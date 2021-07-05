@@ -10,9 +10,9 @@ const Stats = () => {
         </header>
 
         <div id="container " className=" grid grid-cols-2 gap-8">
-          <div className="flex flex-col bg-gray-700 rounded-md  p-4 box-border ">
+          <div className="flex flex-col bg-gray-800 rounded-md  p-4 box-border ">
           <h3 className="text-xl text-white">Projects</h3>
-          <div className="bg-gray-800 rounded-md flex justify-between p-4">
+          <div className="bg-gray-900 rounded-md flex justify-between p-4">
               <img  className="w-1/4" src="/farm2.png" alt="farm" />
               <div>
                 <h3 className="text-white text-lg">Mexico Co-op</h3>
@@ -23,7 +23,7 @@ const Stats = () => {
             </div>
           </div>
 
-          <div id="Peformance" className="flex flex-col justify-between bg-gray-700 rounded-md p-4 space-y-4">
+          <div id="Peformance" className="flex flex-col justify-between bg-gray-800 rounded-md p-4 space-y-4">
             <h3 className="text-xl text-white">Overview</h3>
             
           </div>
