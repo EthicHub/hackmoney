@@ -4,14 +4,34 @@ const chalk = require("chalk");
 const { config, ethers, tenderly, run } = require("hardhat");
 const { utils } = require("ethers");
 const R = require("ramda");
+const { parseEther } = require('@ethersproject/units')
+const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
+const poolID = "0x20facecaa68e9b7c92d2d0ec9136d864df8052330002000000000000000000d9"
+const BalancerNFTBondAddress = '0x8A988b34846E30bf21263870B9A794b962b6Aead'
 
 const main = async () => {
 
   console.log("\n\n 📡 Deploying...\n");
 
-  const principalToken = await deploy("PrincipalToken")
-  const yourCollectible = await deploy("YourCollectible") // <-- add in constructor args like line 19 vvvv
-  const nftBond = await deploy("NFTBond",[principalToken.address])
+  // const principalToken = await deploy("PrincipalToken")
+  // const yourCollectible = await deploy("YourCollectible") // <-- add in constructor args like line 19 vvvv
+  // const nftBond = await deploy("NFTBond",[principalToken.address])
+  /*const principalTokenAddress = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B'
+  const nftBond = await deploy('BalancerNFTBond', [principalTokenAddress, VAULT, poolID])
+  console.log(nftBond.address)
+  */
+  const initialBalances = [parseEther('100')];
+
+  const JOIN_KIND = 1;
+  console.log(initialBalances)
+  // Construct magic userData
+  const nftBond = await ethers.getContractAt('BalancerNFTBond', BalancerNFTBondAddress)
+
+  const initUserData =
+      ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256[]'], 
+                                          [JOIN_KIND, initialBalances]);
+  console.log()
+  await nftBond.depo(parseEther('100'), '0x0000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000056bc75e2d63100000')
   //const yourContract = await ethers.getContractAt('YourContract', "0xaAC799eC2d00C013f1F11c37E654e59B0429DF6A") //<-- if you want to instantiate a version of a contract at a specific address!
   //const secondContract = await deploy("SecondContract")
 
@@ -74,6 +94,7 @@ const deploy = async (contractName, _args = [], overrides = {}, libraries = {}) 
   console.log(` 🛰  Deploying: ${contractName}`);
 
   const contractArgs = _args || [];
+  console.log(contractArgs)
   const contractArtifacts = await ethers.getContractFactory(contractName,{libraries: libraries});
   const deployed = await contractArtifacts.deploy(...contractArgs, overrides);
   const encoded = abiEncodeArgs(deployed, contractArgs);
