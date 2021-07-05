@@ -43,7 +43,9 @@
     "account": "hardhat account",
     "mint": "hardhat run scripts/mint.js",
     "console": "hardat console",
-    "buybond": "hardhat run scripts/buyBond.js",
-    "deployPool": "hardhat run --network kovan scripts/deployPool.js"
+    "buybond": "hardhat run --network kovan scripts/buyBond.js",
+    "deployPool": "hardhat run --network kovan scripts/deployPool.js",
+    "deployBorrowingAssetManager": "hardhat run --network kovan scripts/deployBorrowingAssetManager.js",
+    "initialJoinPool": "hardhat run --network kovan scripts/joinPool.js"
   }
 }

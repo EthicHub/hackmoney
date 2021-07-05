@@ -43,17 +43,23 @@ contract FarmerBorrowing is Interest {
     event Recover(uint indexed loan, address usr, uint currencyAmount);
     event Claim(uint indexed loan, address usr);
 
-    constructor(address currency_,  address pile_, address reserve_) {
+    constructor(address currency_, address pile_) {
         currency = IERC20(currency_);
         pile = PileLike(pile_);
-        reserve = IReserve(reserve_);
-        currency.approve(reserve_, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 
     }
+
+
 
     modifier owner(uint loan) {
       require(borrowers[loan] == msg.sender);
       _;
+    }
+
+    function setReserve(address reserve_) external {
+      reserve = IReserve(reserve_);
+      currency.approve(reserve_, 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+
     }
 
     function requestLoan(uint rate, uint creditCeiling, uint maturity) external returns(uint256) {

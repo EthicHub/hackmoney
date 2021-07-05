@@ -23,6 +23,7 @@
     "compile": "yarn workspace @scaffold-eth/hardhat compile",
     "deploy": "yarn workspace @scaffold-eth/hardhat deploy",
     "deploy-kovan": "yarn workspace @scaffold-eth/hardhat deploy-kovan",
+    "deploy-borrowing-kovan": "yarn workspace @scaffold-eth/hardhat deployBorrowingAssetManager",
     "watch": "yarn workspace @scaffold-eth/hardhat watch",
     "accounts": "yarn workspace @scaffold-eth/hardhat accounts",
     "balance": "yarn workspace @scaffold-eth/hardhat balance",
