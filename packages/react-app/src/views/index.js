@@ -1,3 +1,6 @@
-export { default as ExampleUI } from "./ExampleUI";
-export { default as Hints } from "./Hints";
-export { default as Subgraph } from "./Subgraph";
+
+
+export { default as Bonds } from "./bonds";
+export { default as Landing } from "./landing";
+export { default as Borrow } from "./borrow";
+export { default as stats } from "./stats";
