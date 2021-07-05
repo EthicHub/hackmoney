@@ -7,37 +7,58 @@ const R = require("ramda");
 const { parseEther } = require('@ethersproject/units')
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const vaultABI = require('./vaultABI.json')
-const poolId = "0x20facecaa68e9b7c92d2d0ec9136d864df8052330002000000000000000000d9"
-const BalancerNFTBondAddress = '0x8A988b34846E30bf21263870B9A794b962b6Aead'
+const poolId = "0xCE3E75704E3446AF8871639886ADC7E007B232ED0002000000000000000000DA"
+const iErc20ABI = require("./ierc20.json")
 
 const main = async () => {
 
   console.log("\n\n 📡 Deploying...\n");
-
-  const principalTokenAddress = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B'
-  const DAI = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B';
+  console.log('Approving DAI ....')
+  const DAI = '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa';
   const USDT = '0xcC08220af469192C53295fDd34CFb8DF29aa17AB';
-  const poolTokenAddresses = [DAI, USDT]
-  const nftBond = await deploy('NFTBond', [principalTokenAddress, poolTokenAddresses, VAULT, poolId, 'EthicBond', 'EHB'])
-  console.log(nftBond.address)
-  
+  const [sender] = await ethers.getSigners()
   /*
-  const addresses = []
-  const DAI = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B';
-  const USDT = '0xcC08220af469192C53295fDd34CFb8DF29aa17AB';
-  const initialBalances = [parseEther('100'), BigNumber.from('0')];
+  const dai = new ethers.Contract(DAI, iErc20ABI, sender);
 
-  const JOIN_KIND = 1;
+  //const mkr = await ethers.getContractAt('ERC20', MKR);
+
+  const appDaiTx = await dai.approve(VAULT, parseEther('10000000000000000'));
+  await appDaiTx.wait()
+
+  console.log('Approving USDT ....')
+
+
+  const usdt = new ethers.Contract(USDT, iErc20ABI, sender);
+
+  //const mkr = await ethers.getContractAt('ERC20', MKR);
+  const appUSDTx = await usdt.approve(VAULT, parseEther('100000000000000000'));
+  await appUSDTx.wait()*/
+  
+  // const principalToken = await deploy("PrincipalToken")
+  // const yourCollectible = await deploy("YourCollectible") // <-- add in constructor args like line 19 vvvv
+  // const nftBond = await deploy("NFTBond",[principalToken.address])
+  /*const principalTokenAddress = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B'
+  const nftBond = await deploy('BalancerNFTBond', [principalTokenAddress, VAULT, poolID])
+  console.log(nftBond.address)
+  */
+
+  const addresses = []
+
+  const initialBalances = [parseEther('10'), BigNumber.from('10000000')];
+
+
+
+  
+
+  const JOIN_KIND = 0;
   console.log(initialBalances)
   // Construct magic userData
-  const nftBond = await ethers.getContractAt('BalancerNFTBond', BalancerNFTBondAddress)
 
   const initUserData =
-      ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256[]', 'uint256'],
+      ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256[]'],
       [
-        1,
+        JOIN_KIND,
         initialBalances,
-        0
       ]);
   console.log(initUserData)
   
@@ -52,7 +73,6 @@ const main = async () => {
     fromInternalBalance: false
   }
   console.log(joinPoolRequest)
-  const [sender] = await ethers.getSigners()
 
   const vault = new ethers.Contract(VAULT, vaultABI, sender);
 
@@ -66,7 +86,7 @@ const main = async () => {
   }
   // You can wait for it like this, or just print the tx hash and monitor
   const joinReceipt = await joinTx.wait();
-  console.log(joinReceipt)*/
+  console.log(joinReceipt)
   //await nftBond.depo(parseEther('100'), initUserData)
 
 
