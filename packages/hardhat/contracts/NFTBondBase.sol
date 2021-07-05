@@ -1,5 +1,4 @@
 pragma solidity 0.7.6;
-pragma abicoder v2;
 //SPDX-License-Identifier: MIT
 
 import "hardhat/console.sol";
@@ -10,9 +9,8 @@ import "@balancer-labs/v2-solidity-utils/contracts/openzeppelin/IERC20.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./utils/SimpleInterest.sol";
-import "@balancer-labs/v2-vault/contracts/interfaces/IVault.sol";
 
-contract NFTBond is ERC721, SimpleInterest {
+abstract contract NFTBondBase is ERC721, SimpleInterest {
     using SafeMath for uint256;
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
@@ -26,20 +24,15 @@ contract NFTBond is ERC721, SimpleInterest {
 
     mapping(uint256 => Bond) public bonds;
     IERC20 public principalToken;
-    IVault public vault;
-    bytes32 public poolId;
-
     
     event BondCreated(uint256 id, uint256 mintingDate, uint256 maturity, uint256 principal, uint256 interest);
     event BondRedeemed(uint256 id, uint256 redeemDate, uint256 maturity, uint256 withdrawn, uint256 interest);
 
 
-    constructor(address _principalTokenAddress, string memory _tokenName, string memory _tokenSymbol, address _vault, bytes32 _poolId) ERC721(_tokenName, _tokenSymbol) {
+    constructor(address _principalTokenAddress, string memory _tokenName, string memory _tokenSymbol) ERC721(_tokenName, _tokenSymbol) {
       require(_principalTokenAddress != address(0), "NFTBond::Invalid token address");
       principalToken = IERC20(_principalTokenAddress);
       _setBaseURI("https://ipfs.io/ipfs/");
-      vault = IVault(_vault);
-      poolId = _poolId;
     }
 
     function _createBond(uint256 id, uint256 maturity, uint256 principal, uint256 interest) internal {
@@ -50,17 +43,16 @@ contract NFTBond is ERC721, SimpleInterest {
     }
 
 
-    function buyBond(string calldata tokenURI, uint256 maturity, uint256 principal, uint256 interest, IVault.JoinPoolRequest memory jpr)
-        external
+    function buyBond(string calldata tokenURI, uint256 maturity, uint256 principal, uint256 interest)
+        public
         returns (uint256)
-    {   
-        // TODO: allow interest values corresponding to the market (APY in iDle, defaults, borrowing...) either via algorithm or dao parameter setting
+    {
         console.log("principal token", address(principalToken));
         console.log("sender", msg.sender);
         console.log("allowande",principalToken.allowance(msg.sender, address(this)));
         console.log("principal ", principal);
         require(principalToken.transferFrom(msg.sender, address(this), principal));
-        _depositInPool(principal, jpr);
+        _depositInPool(principal);
         _tokenIds.increment();
 
         uint256 newItemId = _tokenIds.current();
@@ -69,8 +61,6 @@ contract NFTBond is ERC721, SimpleInterest {
         _createBond(newItemId, maturity, principal, interest);
         return newItemId;
     }
-
-    
 
     function redeemBond(uint256 tokenId) external {
       require(canRedeem(tokenId), "NFTBond: Can't redeem yet");
@@ -97,13 +87,7 @@ contract NFTBond is ERC721, SimpleInterest {
       return block.timestamp >= bond.maturity.add(bond.mintingDate);
     }
 
-    function _depositInPool(uint256 amount, IVault.JoinPoolRequest memory jpr) internal {
-
-      vault.joinPool(poolId, address(this), address(this), jpr);
-    }
-
-    function _withdrawFromPool(uint256 amount) internal {
-      // TODO
-    }
+    function _depositInPool(uint256 amount) internal virtual;
+    function _withdrawFromPool(uint256 amount) internal virtual;
     
 }

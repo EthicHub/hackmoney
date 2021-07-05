@@ -1,12 +1,12 @@
 pragma solidity 0.7.6;
 
-import '../NFTBond.sol';
+import '../NFTBondBase.sol';
 
-contract NFTBondMock is NFTBond {
+contract NFTBondMock is NFTBondBase {
 
   address public pool;
   constructor(address _principalTokenAddress, address _pool) 
-    public NFTBond(
+    public NFTBondBase(
       _principalTokenAddress,
       "EthicBondMock",
       "EBM") {
