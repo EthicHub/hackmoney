@@ -32,7 +32,7 @@ contract FarmerBorrowing is Interest {
     mapping (uint256 => address) public borrowers;
     mapping (uint256 => uint256) public balances;
     IReserve public reserve;
-    PileLike pile;
+    PileLike public pile;
 
     // Events
     event Close(uint indexed loan);

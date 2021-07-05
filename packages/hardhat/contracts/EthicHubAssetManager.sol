@@ -16,11 +16,25 @@
 import "./RewardsAssetManager.sol";
 import "./balancer-labs/v2-distributors/contracts/interfaces/IMultiRewards.sol";
 import "./IReserve.sol";
+import "./IIdleToken.sol";
 
 pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
+
+interface PileLike {
+    function setRate(uint, uint) external;
+    function file(bytes32, uint, uint) external;
+    function total() external view returns(uint);
+    function debt(uint) external returns (uint);
+    function accrue(uint) external;
+    function incDebt(uint, uint) external;
+    function decDebt(uint, uint) external;
+}
+
+
 contract EthicHubAssetManager is RewardsAssetManager, IReserve {
+    using Math for uint256;
     uint16 public constant REFERRAL_CODE = 0;
 
     //IERC20 public immutable aToken;
@@ -28,18 +42,21 @@ contract EthicHubAssetManager is RewardsAssetManager, IReserve {
 
     // @notice rewards distributor for pool which owns this asset manager
     IMultiRewards public distributor;
+    IIdleToken idleTokenInstance;
     address public borrowingManager; // Handles borrowing for farmers
-    //Pile public pie; // Handles debt calculation
+    PileLike public pile; // Handles debt calculation
 
     constructor(
         IVault _vault,
         IERC20 _token,
-        //Pile _pile,
-        address _borrowingManager
+        PileLike _pile,
+        address _borrowingManager,
+        IIdleToken _idleTokenInstance
     ) RewardsAssetManager(_vault, bytes32(0), _token) {
 
-        //pile = _pile;
+        pile = _pile;
         _token.approve(_borrowingManager, type(uint256).max);
+        idleTokenInstance = _idleTokenInstance;
     }
 
     /**
@@ -64,7 +81,8 @@ contract EthicHubAssetManager is RewardsAssetManager, IReserve {
      * @return the amount deposited
      */
     function _invest(uint256 amount, uint256) internal override returns (uint256) {
-        // TODO: deposits capital into idleFinance
+        token.approve(address(idleTokenInstance), amount);
+        uint256 idleBalance = idleTokenInstance.mintIdleToken(amount, false, address(this));
         return amount;
     }
 
@@ -75,16 +93,17 @@ contract EthicHubAssetManager is RewardsAssetManager, IReserve {
      */
     function _divest(uint256 amount, uint256) internal override returns (uint256) {
         // TODO: withdraw capital from idleFinance
-        //return lendingPool.withdraw(address(token), amount, address(this));
+        return idleTokenInstance.redeemIdleToken(amount);
     }
 
     /**
-     * @dev Checks AToken balance (ever growing)
+     * @dev Checks debt and idle balance (ever growing)
      */
     function _getAUM() internal view override returns (uint256) {
-        // TODO 
         // return balance in idle + total outstanding debt in FarmerBorrowing
-        return 0; //aToken.balanceOf(address(this));
+        uint256 balanceInIdle = idleTokenInstance.balanceOf(address(this));
+        uint256 aumIdle = balanceInIdle.mul(idleTokenInstance.tokenPriceWithFee(address(this)));
+        return aumIdle.add(pile.total());
     }
 
     /**

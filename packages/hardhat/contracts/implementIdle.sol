@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED0
 
-pragma solidity 0.8.0;
+pragma solidity 0.7.6;
 import "hardhat/console.sol";
-import "./IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IIdleToken.sol";
 
 //idleLBP- idle lending borrowing pool

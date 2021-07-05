@@ -1,6 +1,9 @@
-pragma solidity ^0.8;
+pragma solidity 0.7.6;
 
 interface IIdleToken {
+  function balanceOf(address account) external view returns (uint256);
+  function approve(address spender, uint256 amount) external returns (bool);
+
   function token() external returns (address underlying);
   function govTokens(uint256) external returns (address govToken);
   function userAvgPrices(address) external returns (uint256 avgPrice);
