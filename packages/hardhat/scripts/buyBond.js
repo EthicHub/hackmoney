@@ -26,10 +26,18 @@ const main = async () => {
   //console.log(await principalToken.approve(bond.address, ethers.utils.parseEther("1000000000000000000000000")))
   //console.log(`Approval of ${principalToken.address} is ${await principalToken.allowance(sender.address, principalToken.address)} `)
 
+  const addresses = []
+
+
+
+  const JOIN_KIND = 1;
+  console.log(initialBalances)
+  // Construct magic userData
+
   const initUserData =
       ethers.utils.defaultAbiCoder.encode(['uint256', 'uint256[]', 'uint256'],
       [
-        1,
+        JOIN_KIND,
         initialBalances,
         0
       ]);
@@ -45,6 +53,7 @@ const main = async () => {
     userData: initUserData,
     fromInternalBalance: false
   }
+  console.log(joinPoolRequest)
   console.log(joinPoolRequest)
   console.log(await bond.buyBond('http://localhost:3000',10000, ethers.utils.parseEther('1'), 10, joinPoolRequest))
   /*

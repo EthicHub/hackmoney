@@ -7,6 +7,16 @@ Pool will be investing in impact projects (financing smallholder farmers @ ethic
 
 [Entry in HackMoney2021](EthicHub: Yield Farmers to Actual Farmers · ETHGlobal Showcase)
 
+[https://www.figma.com/proto/LUPiPNxYOkwqz8GRgBEZDs/Hackathon?node-id=86%3A61&scaling=min-zoom](Figma Design)
+
+Deployed Contracts:
+
+Network: Kovan
+- NFTBond: 0x61554676402d5d2533e573d816DDA79a8ffAb1Df
+- EthicHubAssetManager: 0xB352Ab9D2048fFFCe08eaf10b4358b230285AE4C
+- FarmerBorrowing: 0x1ec8bb258f2DbE3C07Fc1E2Bcf8Ad074f4c77d5e
+- Pile (Farmer debt manager): 0xb835BdEA4467Ddb013081594b035FEb5D852e28B
+- Balancer Pool ID: 0xCE3E75704E3446AF8871639886ADC7E007B232ED0002000000000000000000DA
 
 
 # 🏗 Based on scaffold-eth - 🎟 Simple NFT Example

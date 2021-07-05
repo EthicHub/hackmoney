@@ -7,7 +7,7 @@ const R = require("ramda");
 const { parseEther } = require('@ethersproject/units')
 const VAULT = '0xBA12222222228d8Ba445958a75a0704d566BF2C8';
 const vaultABI = require('./vaultABI.json')
-const poolId = "0x20facecaa68e9b7c92d2d0ec9136d864df8052330002000000000000000000d9"
+const poolId = "0xCE3E75704E3446AF8871639886ADC7E007B232ED0002000000000000000000DA"
 const BalancerNFTBondAddress = '0x8A988b34846E30bf21263870B9A794b962b6Aead'
 
 const main = async () => {
@@ -18,9 +18,8 @@ const main = async () => {
   const DAI = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B';
   const USDT = '0xcC08220af469192C53295fDd34CFb8DF29aa17AB';
   const poolTokenAddresses = [DAI, USDT]
-  const nftBond = await deploy('NFTBond', [principalTokenAddress, poolTokenAddresses, VAULT, poolId, 'EthicBond', 'EHB'])
+  const nftBond = await deploy('NFTBond', [principalTokenAddress,'EthicBond', 'EHB', VAULT, poolId])
   console.log(nftBond.address)
-  
   /*
   const addresses = []
   const DAI = '0x04DF6e4121c27713ED22341E7c7Df330F56f289B';
