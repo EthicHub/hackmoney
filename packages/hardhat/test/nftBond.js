@@ -7,18 +7,20 @@ const { BigNumber } = require('@ethersproject/bignumber')
 use(solidity);
 
 describe("NFT Bond", function () {
-  let bond, principalToken,owner, principal
+  let bond, principalToken,owner, principal, pool
 
   describe("NFTBond", function () {
     it("Should deploy NFTBond", async function () {
       const signers = await ethers.getSigners()
       owner = signers[0]
+      pool = signers[1];
       const PrincipalToken = await ethers.getContractFactory("PrincipalToken")
       principalToken = await PrincipalToken.deploy();
+      const NFTBond = await ethers.getContractFactory("NFTBondMock");
+      bond = await NFTBond.deploy(principalToken.address, pool.address);
 
-      const NFTBond = await ethers.getContractFactory("NFTBond");
+      await principalToken.connect(pool).approve(bond.address, parseEther('1999999999999999999999999999'))
 
-      bond = await NFTBond.deploy(principalToken.address);
       const tokenAdd = await bond.principalToken()
       expect(principalToken.address).to.equal(tokenAdd)
     });
