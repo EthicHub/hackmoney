@@ -363,13 +363,25 @@ function App(props) {
               blockExplorer={blockExplorer}
             />
           </Route>
+
+          <Route exact path="/bonds">
+            <Bonds />
+          </Route>
+          <Route exact path="/farms">
+            <Farms />
+          </Route>
+          <Route exact path="/borrow">
+            <Borrow />
+          </Route>
+          <Route exact path="/stats">
+            <Stats />
+          </Route>
         </Switch>
       </BrowserRouter>
 
       <ThemeSwitch />
 
       {/* 👨‍💼 Your account is in the top right with a wallet at connect options */}
-    
     </>
   );
 }
